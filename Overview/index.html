@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI im Digitalen Marketing - Integrierter Workflow</title>
+    <style>
+        /* CSS-Variablen für einfache Anpassung */
+        :root {
+            --radius: 300px; /* Abstand der Card-Zentren vom AI-Zentrum */
+            --card-width: 250px;
+            --card-half-width: 125px; /* Hälfte der Card-Breite */
+            --arrow-dist: 200px; /* Abstand der Pfeil-Zentren vom AI-Zentrum */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .workflow-container {
+            position: relative;
+            width: 100%;
+            /* Höhe des Containers an den Radius anpassen (2 * Radius + Card-Höhe) */
+            min-height: calc(2 * var(--radius) + var(--card-width)); 
+            margin: 40px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .center-ai {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+            font-weight: bold;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .center-ai:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.6);
+        }
+        
+        .phase-card {
+            position: absolute;
+            background: white;
+            border-radius: 15px;
+            padding: 18px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            width: var(--card-width); /* Nutze Variable */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            /* Sorgt dafür, dass die Karte vor der Feedback-Loop und den Pfeilen liegt */
+            z-index: 5; 
+        }
+        
+        .phase-card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+        
+        .phase-card.active {
+            border-color: #764ba2;
+            box-shadow: 0 8px 30px rgba(118, 75, 162, 0.3);
+        }
+        
+        .phase-title {
+            font-size: 1.05em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .phase-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+        
+        .phase-items {
+            list-style: none;
+            font-size: 0.82em;
+            color: #4a5568;
+            line-height: 1.5;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        
+        .phase-items li {
+            padding: 2px 0;
+            padding-left: 18px;
+            position: relative;
+        }
+        
+        .phase-items li:before {
+            content: "•";
+            position: absolute;
+            left: 5px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        /* === KORRIGIERTE KONZENTRISCHE POSITIONIERUNG DER PHASEN === */
+        
+        /* Phase 1 (0° - Oben) */
+        .phase-1 { 
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(-1 * var(--card-half-width)), calc(-1 * var(--radius) - var(--card-half-width)));
+        }
+        
+        /* Phase 2 (60° - Oben rechts) */
+        .phase-2 { 
+            top: 50%;
+            left: 50%;
+            transform: translate(
+                calc(var(--radius) * 0.5 - var(--card-half-width)), 
+                calc(-1 * var(--radius) * 0.866 - var(--card-half-width))
+            );
+        }
+        
+        /* Phase 3 (120° - Unten rechts) */
+        .phase-3 { 
+            top: 50%;
+            left: 50%;
+            transform: translate(
+                calc(var(--radius) * 0.866 - var(--card-half-width)), 
+                calc(var(--radius) * 0.5 - var(--card-half-width))
+            );
+        }
+        
+        /* Phase 4 (180° - Unten) */
+        .phase-4 { 
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(-1 * var(--card-half-width)), calc(var(--radius) - var(--card-half-width)));
+        }
+        
+        /* Phase 5 (240° - Unten links) */
+        .phase-5 { 
+            top: 50%;
+            left: 50%;
+            transform: translate(
+                calc(-1 * var(--radius) * 0.866 - var(--card-half-width)), 
+                calc(var(--radius) * 0.5 - var(--card-half-width))
+            );
+        }
+        
+        /* Phase 6 (300° - Oben links) */
+        .phase-6 { 
+            top: 50%;
+            left: 50%;
+            transform: translate(
+                calc(-1 * var(--radius) * 0.5 - var(--card-half-width)), 
+                calc(-1 * var(--radius) * 0.866 - var(--card-half-width))
+            );
+        }
+        /* ========================================================= */
+        
+        /* Arrows - angepasst für kreisförmige Anordnung */
+        .arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            color: #667eea;
+            font-size: 3em; 
+            opacity: 0.4;
+            font-weight: bold;
+            z-index: 2; 
+        }
+        
+        .arrow::before {
+            content: "";
+        }
+        
+        /* === KORRIGIERTE POSITIONIERUNG DER PFEILE === */
+
+        /* Pfeil 1 (Phase 1 zu 2 | 30° Position) */
+        .arrow-1 { 
+            transform: translate(
+                calc(var(--arrow-dist) * 0.5 - 50%), 
+                calc(-1 * var(--arrow-dist) * 0.866 - 50%)
+            ) rotate(60deg);
+        }
+        .arrow-1::before {
+            content: "↑"; 
+        }
+        
+        /* Pfeil 2 (Phase 2 zu 3 | 90° Position) */
+        .arrow-2 { 
+            transform: translate(
+                calc(var(--arrow-dist) * 0.866 - 50%), 
+                calc(-1 * var(--arrow-dist) * 0.5 - 50%)
+            ) rotate(90deg);
+        }
+        .arrow-2::before {
+            content: "→";
+        }
+        
+        /* Pfeil 3 (Phase 3 zu 4 | 150° Position) */
+        .arrow-3 { 
+            transform: translate(
+                calc(var(--arrow-dist) * 0.866 - 50%), 
+                calc(var(--arrow-dist) * 0.5 - 50%)
+            ) rotate(120deg);
+        }
+        .arrow-3::before {
+            content: "↓";
+        }
+        
+        /* Pfeil 4 (Phase 4 zu 5 | 210° Position) */
+        .arrow-4 { 
+            transform: translate(
+                calc(var(--arrow-dist) * 0.5 - 50%), 
+                calc(var(--arrow-dist) * 0.866 - 50%)
+            ) rotate(180deg);
+        }
+        .arrow-4::before {
+            content: "↓";
+        }
+        
+        /* Pfeil 5 (Phase 5 zu 6 | 270° Position) */
+        .arrow-5 { 
+            transform: translate(
+                calc(-1 * var(--arrow-dist) * 0.866 - 50%), 
+                calc(var(--arrow-dist) * 0.5 - 50%)
+            ) rotate(240deg);
+        }
+        .arrow-5::before {
+            content: "←";
+        }
+        
+        /* Pfeil 6 (Phase 6 zu 1 | 330° Position) */
+        .arrow-6 { 
+            transform: translate(
+                calc(-1 * var(--arrow-dist) * 0.866 - 50%), 
+                calc(-1 * var(--arrow-dist) * 0.5 - 50%)
+            ) rotate(300deg);
+        }
+        .arrow-6::before {
+            content: "↑";
+        }
+        /* ========================================= */
+        
+        .feedback-loop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* Größe an Radius anpassen, damit es die Cards umschließt */
+            width: calc(2 * var(--radius) + var(--card-width));
+            height: calc(2 * var(--radius) + var(--card-width));
+            border: 2px dashed rgba(102, 126, 234, 0.15);
+            border-radius: 50%;
+            animation: rotate 45s linear infinite;
+            pointer-events: none;
+            z-index: 1; /* Unter den Pfeilen und Cards */
+        }
+
+        /* --- NEU: Quellenhinweis --- */
+        .source-note {
+            position: absolute;
+            bottom: 20px; 
+            left: 20px; 
+            font-size: 0.75em;
+            color: #718096;
+            opacity: 0.6; 
+            z-index: 10;
+        }
+        /* -------------------------- */
+        
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .benefits-bar {
+            background: linear-gradient(135deg, #f6f9fc 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        
+        .benefit-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .benefit-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .benefit-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+        
+        .benefit-label {
+            font-size: 0.95em;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .benefit-description {
+            font-size: 0.8em;
+            color: #718096;
+            line-height: 1.4;
+        }
+        
+        .application-areas {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f7fafc;
+            border-radius: 15px;
+        }
+        
+        .application-title {
+            font-size: 1.5em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .application-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .application-category {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .application-category h4 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .application-list {
+            font-size: 0.9em;
+            color: #718096;
+            line-height: 1.6;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .info-box h3 {
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* Scrollbar styling for phase items */
+        .phase-items::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .phase-items::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .phase-items::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
+        }
+        
+        .phase-items::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>KI im Digitalen Marketing</h1>
+        <p class="subtitle">Integrierter Workflow mit 6 Kernbereichen</p>
+        
+        <div class="workflow-container">
+            <div class="feedback-loop"></div>
+            
+            <div class="center-ai" onclick="toggleAll()">AI</div>
+            
+            <div class="phase-card phase-1" onclick="togglePhase(1)">
+                <div class="phase-title">
+                    <div class="phase-icon">📊</div>
+                    <span>Analysieren & Recherchieren</span>
+                </div>
+                <ul class="phase-items">
+                    <li>Marktanalyse & Wettbewerbsbeobachtung</li>
+                    <li>Customer Insights & Verhaltensanalyse</li>
+                    <li>Trendanalyse & Forecasting</li>
+                    <li>Sentiment-Analyse</li>
+                    <li>Voice of Customer Analysis</li>
+                    <li>Datensammlung & -aufbereitung</li>
+                    <li>Attribution Modeling</li>
+                    <li>Zielgruppenanalyse</li>
+                </ul>
+            </div>
+            
+            <div class="phase-card phase-2" onclick="togglePhase(2)">
+                <div class="phase-title">
+                    <div class="phase-icon">💡</div>
+                    <span>Konzepte & Strategien</span>
+                </div>
+                <ul class="phase-items">
+                    <li>Markenaufbau und -entwicklung</li>
+                    <li>Kampagnenkonzeption</li>
+                    <li>Content-Strategie</li>
+                    <li>Persona-Entwicklung</li>
+                    <li>Customer Journey Mapping</li>
+                    <li>Kanalstrategie</li>
+                    <li>Positioning & Messaging</li>
+                    <li>Pricing-Strategien</li>
+                </ul>
+            </div>
+            
+            <div class="phase-card phase-3" onclick="togglePhase(3)">
+                <div class="phase-title">
+                    <div class="phase-icon">🎨</div>
+                    <span>Content Creation</span>
+                </div>
+                <ul class="phase-items">
+                    <li>Texterstellung (Copy, Artikel, Scripts)</li>
+                    <li>Bildgenerierung & -bearbeitung</li>
+                    <li>Videoproduktion & -editing</li>
+                    <li>Audio & Podcast-Content</li>
+                    <li>Personalisierte Content-Varianten</li>
+                    <li>Dynamic Creative Optimization</li>
+                    <li>Interactive Content</li>
+                    <li>Übersetzung & Lokalisierung</li>
+                    <li>Template-Erstellung</li>
+                    <li>Brand Asset Creation</li>
+                </ul>
+            </div>
+            
+            <div class="phase-card phase-4" onclick="togglePhase(4)">
+                <div class="phase-title">
+                    <div class="phase-icon">⚡</div>
+                    <span>Automatisierung & Ausführung</span>
+                </div>
+                <ul class="phase-items">
+                    <li>E-Mail Marketing Automation</li>
+                    <li>Social Media Scheduling</li>
+                    <li>Programmatic Advertising</li>
+                    <li>Marketing Workflows</li>
+                    <li>Lead Nurturing Prozesse</li>
+                    <li>Trigger-basierte Kampagnen</li>
+                    <li>Cross-Channel Orchestrierung</li>
+                    <li>API-Integrationen</li>
+                </ul>
+            </div>
+            
+            <div class="phase-card phase-5" onclick="togglePhase(5)">
+                <div class="phase-title">
+                    <div class="phase-icon">🎯</div>
+                    <span>Kampagnensteuerung</span>
+                </div>
+                <ul class="phase-items">
+                    <li>Echtzeit-Bid-Management</li>
+                    <li>Budget-Allokation</li>
+                    <li>Personalisierte Ausspielung</li>
+                    <li>Individual-Level Targeting</li>
+                    <li>Recommendation Engines</li>
+                    <li>A/B & Multivariate Testing</li>
+                    <li>Audience Targeting Optimierung</li>
+                    <li>Creative Optimization</li>
+                    <li>Channel-Mix Optimierung</li>
+                    <li>Conversion Rate Optimierung</li>
+                </ul>
+            </div>
+            
+            <div class="phase-card phase-6" onclick="togglePhase(6)">
+                <div class="phase-title">
+                    <div class="phase-icon">📈</div>
+                    <span>Performance Measurement</span>
+                </div>
+                <ul class="phase-items">
+                    <li>KPI-Tracking & Dashboards</li>
+                    <li>ROI & ROAS Analyse</li>
+                    <li>Conversion Attribution</li>
+                    <li>Customer Lifetime Value Analyse</li>
+                    <li>Cohorten-Analyse</li>
+                    <li>Predictive Performance Modeling</li>
+                    <li>Anomalie-Erkennung</li>
+                    <li>Report-Automatisierung</li>
+                </ul>
+            </div>
+            
+            <div class="arrow arrow-1"></div>
+            <div class="arrow arrow-2"></div>
+            <div class="arrow arrow-3"></div>
+            <div class="arrow arrow-4"></div>
+            <div class="arrow arrow-5"></div>
+            <div class="arrow arrow-6"></div>
+
+            <div class="source-note">
+                (c) FH-Prof. Dr. Alexander Schwarz-Musch | biz-dev.at | Stand: November 2025
+            </div>
+        </div>
+        
+        <div class="benefits-bar">
+            <div class="benefit-item">
+                <div class="benefit-icon">🧠</div>
+                <div class="benefit-label">Mustererkennung</div>
+                <div class="benefit-description">Erkennt komplexe Zusammenhänge in großen Datenmengen</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">⚡</div>
+                <div class="benefit-label">Echtzeit-Verarbeitung</div>
+                <div class="benefit-description">Millisekunden-schnelle Entscheidungen und Anpassungen</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">🔮</div>
+                <div class="benefit-label">Prädiktive Fähigkeiten</div>
+                <div class="benefit-description">Vorhersage von Kundenverhalten und Trends</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">🎯</div>
+                <div class="benefit-label">Hyperpersonalisierung</div>
+                <div class="benefit-description">1:1 Kommunikation in großem Maßstab</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">🔄</div>
+                <div class="benefit-label">24/7 Verfügbarkeit</div>
+                <div class="benefit-description">Kontinuierliche Optimierung ohne Unterbrechung</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">📚</div>
+                <div class="benefit-label">Kontinuierliches Lernen</div>
+                <div class="benefit-description">Selbstverbessernde Systeme durch Machine Learning</div>
+            </div>
+        </div>
+        
+        <div class="application-areas">
+            <h3 class="application-title">KI-Anwendungsbereiche im Marketing</h3>
+            <div class="application-grid">
+                <div class="application-category">
+                    <h4>🔍 Datenanalyse & Insights</h4>
+                    <div class="application-list">
+                        Mustererkennung, Verhaltensanalyse, Prognosemodelle, Segmentierung, Performance-Messung
+                    </div>
+                </div>
+                <div class="application-category">
+                    <h4>🎨 Content-Erstellung</h4>
+                    <div class="application-list">
+                        Textgenerierung, Bildbearbeitung, Videoproduktion, Übersetzungen, kreative Konzepte
+                    </div>
+                </div>
+                <div class="application-category">
+                    <h4>⚙️ Prozessautomatisierung</h4>
+                    <div class="application-list">
+                        Kampagnenmanagement, E-Mail-Workflows, Social Media Posting, Reporting, Testing
+                    </div>
+                </div>
+                <div class="application-category">
+                    <h4>👥 Kundenerlebnis</h4>
+                    <div class="application-list">
+                        Personalisierung, Empfehlungssysteme, Customer Journey Optimierung, Echtzeit-Anpassungen
+                    </div>
+                </div>
+                <div class="application-category">
+                    <h4>📊 Werbeoptimierung</h4>
+                    <div class="application-list">
+                        Bidding-Strategien, Zielgruppenansprache, Budget-Allokation, Performance-Optimierung
+                    </div>
+                </div>
+                <div class="application-category">
+                    <h4>💬 Kommunikation</h4>
+                    <div class="application-list">
+                        Chatbots, Sprachassistenten, automatisierte Antworten, Sentiment-Reaktionen
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>🚀 Zukünftige Entwicklungen & Trends</h3>
+            <p>
+                Privacy-First Marketing • Cookieless Tracking • Voice Search Optimization • 
+                Conversational Commerce • AR/VR Marketing • Sustainable AI • 
+                Ethical AI Governance • Quantum Computing • Web3 Marketing • 
+                Synthetic Media • Emotion AI • Edge AI Computing
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        let activePhase = null;
+        
+        function togglePhase(phase) {
+            const cards = document.querySelectorAll('.phase-card');
+            const selectedCard = document.querySelector(`.phase-${phase}`);
+            
+            if (activePhase === phase) {
+                selectedCard.classList.remove('active');
+                activePhase = null;
+            } else {
+                cards.forEach(card => card.classList.remove('active'));
+                selectedCard.classList.add('active');
+                activePhase = phase;
+            }
+        }
+        
+        function toggleAll() {
+            const cards = document.querySelectorAll('.phase-card');
+            if (activePhase !== null) {
+                cards.forEach(card => card.classList.remove('active'));
+                activePhase = null;
+            } else {
+                cards.forEach(card => card.classList.add('active'));
+                activePhase = 'all';
+            }
+        }
+        
+        // Add subtle animation on load
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.phase-card');
+            cards.forEach((card, index) => {
+                const originalTransition = card.style.transition;
+                card.style.transition = 'none';
+
+                card.style.opacity = '0';
+                card.style.transform += ' scale(0.8)';
+
+                setTimeout(() => {
+                    card.style.transition = originalTransition || 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = card.style.transform.replace(' scale(0.8)', '');
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
