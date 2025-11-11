@@ -107,7 +107,6 @@
             box-shadow: 0 8px 30px rgba(0,0,0,0.15);
             border-color: #667eea;
             transform: scale(1.02);
-            /* z-index: 5 ist hier nicht nötig, da es bereits im Normalzustand 5 ist */
         }
         
         .phase-card.active {
@@ -162,8 +161,7 @@
         }
         
         /* === KORRIGIERTE KONZENTRISCHE POSITIONIERUNG DER PHASEN === */
-        /* Die Transformation sorgt dafür, dass das ZENTRUM jeder Karte auf dem Radius liegt */
-
+        
         /* Phase 1 (0° - Oben) */
         .phase-1 { 
             top: 50%;
@@ -175,7 +173,6 @@
         .phase-2 { 
             top: 50%;
             left: 50%;
-            /* X: cos(60)*R - Card/2 | Y: -sin(60)*R - Card/2 */
             transform: translate(
                 calc(var(--radius) * 0.5 - var(--card-half-width)), 
                 calc(-1 * var(--radius) * 0.866 - var(--card-half-width))
@@ -186,7 +183,6 @@
         .phase-3 { 
             top: 50%;
             left: 50%;
-            /* X: sin(60)*R - Card/2 | Y: cos(60)*R - Card/2 */
             transform: translate(
                 calc(var(--radius) * 0.866 - var(--card-half-width)), 
                 calc(var(--radius) * 0.5 - var(--card-half-width))
@@ -204,7 +200,6 @@
         .phase-5 { 
             top: 50%;
             left: 50%;
-            /* X: -sin(60)*R - Card/2 | Y: cos(60)*R - Card/2 */
             transform: translate(
                 calc(-1 * var(--radius) * 0.866 - var(--card-half-width)), 
                 calc(var(--radius) * 0.5 - var(--card-half-width))
@@ -215,7 +210,6 @@
         .phase-6 { 
             top: 50%;
             left: 50%;
-            /* X: -cos(60)*R - Card/2 | Y: -sin(60)*R - Card/2 */
             transform: translate(
                 calc(-1 * var(--radius) * 0.5 - var(--card-half-width)), 
                 calc(-1 * var(--radius) * 0.866 - var(--card-half-width))
@@ -229,14 +223,13 @@
             top: 50%;
             left: 50%;
             color: #667eea;
-            font-size: 3em; /* Vergrößert */
+            font-size: 3em; 
             opacity: 0.4;
             font-weight: bold;
-            z-index: 2; /* Über der Feedback-Loop */
+            z-index: 2; 
         }
         
         .arrow::before {
-            /* Das Content-Property wird pro Pfeil-Klasse überschrieben */
             content: "";
         }
         
@@ -245,12 +238,12 @@
         /* Pfeil 1 (Phase 1 zu 2 | 30° Position) */
         .arrow-1 { 
             transform: translate(
-                calc(var(--arrow-dist) * 0.5 - 50%), /* cos(60) * R_arrow */
-                calc(-1 * var(--arrow-dist) * 0.866 - 50%) /* -sin(60) * R_arrow */
+                calc(var(--arrow-dist) * 0.5 - 50%), 
+                calc(-1 * var(--arrow-dist) * 0.866 - 50%)
             ) rotate(60deg);
         }
         .arrow-1::before {
-            content: "↑"; /* Zeigt von 1 zu 2 (im Kreis) */
+            content: "↑"; 
         }
         
         /* Pfeil 2 (Phase 2 zu 3 | 90° Position) */
@@ -323,6 +316,18 @@
             pointer-events: none;
             z-index: 1; /* Unter den Pfeilen und Cards */
         }
+
+        /* --- NEU: Quellenhinweis --- */
+        .source-note {
+            position: absolute;
+            bottom: 20px; 
+            left: 20px; 
+            font-size: 0.75em;
+            color: #718096;
+            opacity: 0.6; 
+            z-index: 10;
+        }
+        /* -------------------------- */
         
         @keyframes rotate {
             from { transform: translate(-50%, -50%) rotate(0deg); }
@@ -570,6 +575,10 @@
             <div class="arrow arrow-4"></div>
             <div class="arrow arrow-5"></div>
             <div class="arrow arrow-6"></div>
+
+            <div class="source-note">
+                (c) FH-Prof. Dr. Alexander Schwarz-Musch | biz-dev.at | Stand: November 2025
+            </div>
         </div>
         
         <div class="benefits-bar">
@@ -690,15 +699,12 @@
         window.addEventListener('load', () => {
             const cards = document.querySelectorAll('.phase-card');
             cards.forEach((card, index) => {
-                // Remove existing transition (to ensure it fades in correctly)
                 const originalTransition = card.style.transition;
                 card.style.transition = 'none';
 
-                // Initial state for animation
                 card.style.opacity = '0';
                 card.style.transform += ' scale(0.8)';
 
-                // Re-apply transition and animate after a delay
                 setTimeout(() => {
                     card.style.transition = originalTransition || 'all 0.5s ease';
                     card.style.opacity = '1';
